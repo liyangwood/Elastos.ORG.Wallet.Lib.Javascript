@@ -17,16 +17,22 @@ const toCode = (pubKeyBuf, signType) => {
     return Buffer.concat([Buffer.from([0x21]), pubKeyBuf, Buffer.from([signType])])
 }
 
-const getAddress = (pubKey, signType = 0xac) => {
+const getAddressBase = (pubKey, signType) => {
     const pubKeyBuf = new Buffer(pubKey, 'hex')
-    const code = toCode(pubKeyBuf, signType)
+    const code = toCode(pubKeyBuf, signTypeMap[signType].type)
     const hashBuf = Hash.sha256ripemd160(code)
-    const programHashBuf = Buffer.concat([Buffer.from([0x21]), hashBuf])
+    const programHashBuf = Buffer.concat([Buffer.from([signTypeMap[signType].address]), hashBuf])
 
     return Base58Check.encode(programHashBuf)
 }
 
+const getAddress = pubKey => getAddressBase(pubKey, 'ELA_STANDARD')
+const getDid = pubKey => getAddressBase(pubKey, 'ELA_IDCHAIN')
+const getMultiSignAddress = pubKey => getAddressBase(pubKey, 'ELA_MULTISIG')
+
 module.exports = {
     toCode,
     getAddress,
+    getDid,
+    getMultiSignAddress,
 }
